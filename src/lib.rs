@@ -1,3 +1,6 @@
+use std::io::Cursor;
+
+use lewton::inside_ogg::OggStreamReader;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -30,6 +33,22 @@ pub fn read_metadata(buffer: &[u8]) -> Option<AudioMetadata> {
         return Some(AudioMetadata {
             sample_rate,
             sample_length,
+        });
+    }
+
+    if let Ok(/* mut */ reader) = OggStreamReader::new(Cursor::new(buffer)) {
+        let sample_rate = reader.ident_hdr.audio_sample_rate;
+        // let mut sample_length = 0;
+
+        // while let Ok(Some(samples)) = reader.read_dec_packet() {
+        //     sample_length += samples.num_samples();
+        // }
+
+        let sample_length = reader.get_last_absgp().unwrap_or(0);
+
+        return Some(AudioMetadata {
+            sample_rate,
+            sample_length: sample_length as u32,
         });
     }
 

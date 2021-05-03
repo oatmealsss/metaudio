@@ -57,6 +57,17 @@ pub fn read_metadata(buffer: &[u8]) -> Option<AudioMetadata> {
         });
     }
 
+    if let Ok(tag) = mp4ameta::Tag::read_from(&mut Cursor::new(buffer)) {
+        if let (Some(sample_rate), Some(duration)) = (tag.sample_rate(), tag.duration()) {
+            return Some(AudioMetadata {
+                sample_rate: sample_rate.hz(),
+                sample_length: (duration.as_secs_f32() * sample_rate.hz() as f32).round() as u32,
+            });
+        } else {
+            return None;
+        }
+    }
+
     if let Ok(meta) = mp3_metadata::read_from_slice(buffer) {
         let sample_rate = meta.frames[0].sampling_freq as u32;
 

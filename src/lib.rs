@@ -1,5 +1,6 @@
 use std::io::Cursor;
 
+use claxon::{FlacReader, FlacReaderOptions};
 use lewton::audio::get_decoded_sample_count;
 use wasm_bindgen::prelude::*;
 
@@ -37,6 +38,22 @@ pub fn read_metadata(buffer: &[u8]) -> Option<AudioMetadata> {
         return Some(AudioMetadata {
             sample_rate,
             sample_length,
+        });
+    }
+
+    let reader = buffer;
+    if let Ok(reader) = FlacReader::new_ext(
+        reader,
+        FlacReaderOptions {
+            metadata_only: true,
+            read_vorbis_comment: false,
+        },
+    ) {
+        let meta = reader.streaminfo();
+
+        return Some(AudioMetadata {
+            sample_rate: meta.sample_rate,
+            sample_length: meta.samples.unwrap_or(0) as u32,
         });
     }
 

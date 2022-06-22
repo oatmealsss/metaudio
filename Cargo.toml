@@ -1,7 +1,7 @@
 [package]
 name = "metaudio"
 version = "0.1.0"
-authors = ["nasso <nassomails@gmail.com>"]
+authors = ["nasso <nassomails@gmail.com>", "oatmealsss"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -17,3 +17,5 @@ lewton = "0.10"
 ogg = "0.8"
 claxon = "0.4"
 mp4ameta = "0.10"
+nom = "7"
+extended = "0.1"

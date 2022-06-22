@@ -4,7 +4,10 @@ use claxon::{FlacReader, FlacReaderOptions};
 use lewton::audio::get_decoded_sample_count;
 use wasm_bindgen::prelude::*;
 
+pub mod aiffparse;
+
 #[wasm_bindgen]
+#[derive(Debug)]
 pub struct AudioMetadata {
     pub sample_rate: u32,
     pub sample_length: u32,
@@ -67,6 +70,15 @@ pub fn read_metadata(buffer: &[u8]) -> Option<AudioMetadata> {
             return None;
         }
     }
+    
+    if let Ok((_, aiff)) = aiffparse::parse_common(buffer) {
+        let sample_rate = aiff.sample_rate.to_f64() as u32;
+        let sample_length = aiff.num_frames;
+        return Some(AudioMetadata {
+            sample_rate,
+            sample_length
+        })
+    }
 
     if let Ok(meta) = mp3_metadata::read_from_slice(buffer) {
         let sample_rate = meta.frames[0].sampling_freq as u32;
@@ -81,4 +93,17 @@ pub fn read_metadata(buffer: &[u8]) -> Option<AudioMetadata> {
     }
 
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use super::*;
+    #[test]
+    fn file_test() {
+        let fil = "test_files/testfile.aiff";
+        let data = fs::read(fil).expect("file read error");
+        let meta = read_metadata(&data);
+        println!("{:?}", meta);
+    }
 }
